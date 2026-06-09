@@ -26,25 +26,37 @@ class _ChatConversationViewState extends State<ChatConversationView> {
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
-    _loadMessages();
+
+    // ✅ Ensure WebSocket is connected and join the chat room
+    WebSocketService.connect();
+    WebSocketService.joinChat(widget.chatId);
+
+    // Set up the WebSocket listener
     WebSocketService.onNewMessage = (msg) {
-      if (msg['chatId'] == widget.chatId) {
-        setState(() {
-          messages.add(msg); // add to end (chronological order)
-        });
+      if (msg['chatId'] != widget.chatId) return;
+      final exists = messages.any((m) => m['_id'] == msg['_id']);
+      if (!exists && mounted) {
+        setState(() => messages.add(msg));
         _scrollToBottom();
       }
     };
-    WebSocketService.joinChat(widget.chatId);
+
+    _loadUserInfo();
+    _loadMessages();
     ChatService.markRead(widget.chatId);
+  }
+
+  @override
+  void dispose() {
+    WebSocketService.onNewMessage = null;
+    super.dispose();
   }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          0,
+          _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -57,18 +69,20 @@ class _ChatConversationViewState extends State<ChatConversationView> {
     final url = Uri.parse('${SVKey.mainUrl}/api/admin/users/${widget.otherUserId}');
     final res = await http.get(url, headers: {'Authorization': 'Bearer $token'});
     final data = json.decode(res.body);
-    if (data['status'] == '1') {
+    if (data['status'] == '1' && mounted) {
       setState(() => otherUser = data['payload']);
     }
   }
 
   Future<void> _loadMessages() async {
     final msgs = await ChatService.getMessages(widget.chatId);
-    setState(() {
-      messages = msgs; // already chronological (oldest first)
-      loading = false;
-    });
-    _scrollToBottom();
+    if (mounted) {
+      setState(() {
+        messages = msgs;
+        loading = false;
+      });
+      _scrollToBottom();
+    }
   }
 
   void sendMessage() async {
@@ -76,8 +90,10 @@ class _ChatConversationViewState extends State<ChatConversationView> {
     final text = _controller.text;
     _controller.clear();
 
-    // Optimistic add
+    // Optimistic add with a temporary id
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final tempMsg = {
+      '_id': tempId,
       'chatId': widget.chatId,
       'senderId': ServiceCall.userPayload['userId'],
       'text': text,
@@ -87,12 +103,21 @@ class _ChatConversationViewState extends State<ChatConversationView> {
     setState(() => messages.add(tempMsg));
     _scrollToBottom();
 
-    final success = await ChatService.sendMessage(widget.chatId, text);
-    if (!success) {
-      setState(() => messages.removeWhere((m) => m == tempMsg));
+    // Send to server
+    final sent = await ChatService.sendMessage(widget.chatId, text);
+    if (!mounted) return;
+
+    if (!sent) {
+      // Failed – remove optimistic message
+      setState(() => messages.removeWhere((m) => m['_id'] == tempId));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to send message")),
       );
+    } else {
+      // Replace optimistic message with a reload after a short delay
+      // This ensures we get the real _id and any messages from the other user.
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) _loadMessages();
     }
   }
 
@@ -123,10 +148,10 @@ class _ChatConversationViewState extends State<ChatConversationView> {
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
-                    reverse: true, // so newest at bottom
+                    reverse: true,
                     itemCount: messages.length,
                     itemBuilder: (_, i) {
-                      final msg = messages[messages.length - 1 - i]; // iterate from newest to oldest for display order
+                      final msg = messages[messages.length - 1 - i];
                       final isMe = msg['senderId'] == currentUserId;
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),

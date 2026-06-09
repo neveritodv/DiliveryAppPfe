@@ -25,8 +25,10 @@
     });
 
     
-    // Chat events
-    socket.on('join-chat', (chatId) => socket.join(`chat_${chatId}`));
+socket.on('join-chat', (chatId) => {
+  socket.join(`chat_${chatId}`);
+  console.log(`Socket ${socket.id} joined room chat_${chatId}`);
+});
 
     socket.on('disconnect', () => {
       console.log('Socket disconnected:', socket.id);

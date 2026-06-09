@@ -9,9 +9,13 @@ class WebSocketService {
   static Function(String)? onStatusUpdate;
   static Function(Map)? onNewMessage;
 
+  // Store the rooms we need to join
+  static final Set<String> _chatRooms = {};
+
   static void connect([String orderId = '']) {
     final token = ServiceCall.userPayload['auth_token'];
     if (_socket != null && _socket!.connected) return;
+
     _socket = IO.io(Globs.webSocketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
@@ -21,15 +25,21 @@ class WebSocketService {
 
     _socket!.on('connect', (_) {
       print('✅ WebSocket connected');
+      // Rejoin any previously stored chat rooms
+      for (final room in _chatRooms) {
+        _socket!.emit('join-chat', room);
+      }
       if (orderId.isNotEmpty) {
         _socket!.emit('join-order', orderId);
       }
     });
 
-    _socket!.on('location-update', (data) {
-      onLocationUpdate?.call(data);
+    _socket!.on('new-message', (data) {
+      print('🔔 New message received: $data');
+      onNewMessage?.call(data);
     });
 
+    _socket!.on('location-update', (data) => onLocationUpdate?.call(data));
     _socket!.on('order-status', (data) {
       final status = data['status'];
       onStatusUpdate?.call(status);
@@ -45,22 +55,18 @@ class WebSocketService {
       }
     });
 
-    _socket!.on('new-message', (data) {
-      print('🔔 New message received: $data');
-      onNewMessage?.call(data);
-    });
-
     _socket!.on('disconnect', (_) {
       print('❌ WebSocket disconnected');
     });
   }
 
-  static void joinDeliveryRoom() {
-    _socket?.emit('join-delivery-room');
+  static void joinChat(String chatId) {
+    _chatRooms.add(chatId);               // remember for reconnection
+    _socket?.emit('join-chat', chatId);
   }
 
-  static void joinChat(String chatId) {
-    _socket?.emit('join-chat', chatId);
+  static void joinDeliveryRoom() {
+    _socket?.emit('join-delivery-room');
   }
 
   static void sendLocation(double lat, double lng) {
@@ -71,12 +77,9 @@ class WebSocketService {
     _socket?.emit('status-update', {'orderId': orderId, 'status': status});
   }
 
-  static void sendChatMessage(String chatId, String text) {
-    _socket?.emit('chat-message', {'chatId': chatId, 'text': text});
-  }
-
   static void disconnect() {
     _socket?.dispose();
     _socket = null;
+    _chatRooms.clear();
   }
 }

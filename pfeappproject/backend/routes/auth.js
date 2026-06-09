@@ -153,4 +153,71 @@ router.post('/upload-avatar', auth, (req, res) => {
   }
 });
 
+
+// Forgot password – request reset code
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const usersDB = getDB(req).usersDB;
+
+  const user = await new Promise((resolve, reject) => {
+    usersDB.findOne({ email }, (err, doc) => err ? reject(err) : resolve(doc));
+  });
+
+  if (!user) return res.json({ status: '0', message: 'Email not found' });
+
+  // Generate a 6‑digit reset code
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  usersDB.update(
+    { _id: user._id },
+    { $set: { resetCode, resetCodeExpires: Date.now() + 600000 } }, // 10 min
+    {},
+    (err) => {
+      if (err) return res.json({ status: '0', message: err.message });
+      console.log(`Reset code for ${email}: ${resetCode}`);
+      // In production, send email with the code
+      res.json({ status: '1', message: 'Reset code sent to your email' });
+    }
+  );
+});
+
+// Verify reset code and return userId
+router.post('/verify-reset-code', async (req, res) => {
+  const { email, reset_code } = req.body;
+  const usersDB = getDB(req).usersDB;
+
+  const user = await new Promise((resolve, reject) => {
+    usersDB.findOne({ email, resetCode: reset_code }, (err, doc) => err ? reject(err) : resolve(doc));
+  });
+
+  if (!user) return res.json({ status: '0', message: 'Invalid reset code' });
+  if (Date.now() > (user.resetCodeExpires || 0))
+    return res.json({ status: '0', message: 'Reset code expired' });
+
+  res.json({ status: '1', payload: { userId: user._id, resetCode: reset_code } });
+});
+
+// Set new password
+router.post('/reset-password', async (req, res) => {
+  const { user_id, reset_code, new_password } = req.body;
+  const usersDB = getDB(req).usersDB;
+
+  const user = await new Promise((resolve, reject) => {
+    usersDB.findOne({ _id: user_id, resetCode: reset_code }, (err, doc) => err ? reject(err) : resolve(doc));
+  });
+
+  if (!user) return res.json({ status: '0', message: 'Invalid or expired code' });
+
+  const hashed = await bcrypt.hash(new_password, 10);
+  usersDB.update(
+    { _id: user._id },
+    { $set: { password: hashed, resetCode: null, resetCodeExpires: null } },
+    {},
+    (err) => {
+      if (err) return res.json({ status: '0', message: err.message });
+      res.json({ status: '1', message: 'Password updated successfully' });
+    }
+  );
+});
+
 module.exports = router;

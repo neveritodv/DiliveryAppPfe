@@ -28,7 +28,6 @@ router.post('/get-or-create', auth, async (req, res) => {
 // Get all chats for current user
 router.get('/my-chats', auth, async (req, res) => {
   const chatsDB = getDB(req).chatsDB;
-  // find chats where the user is in the participants array
   chatsDB.find({ participants: req.user.id }, (err, chats) => {
     if (err) return res.json({ status: '0', message: err.message });
     res.json({ status: '1', payload: chats });
@@ -54,6 +53,8 @@ router.post('/message', auth, async (req, res) => {
     getDB(req).chatsDB.update({ _id: chatId }, { $set: { updatedAt: Date.now() } }, {}, () => {});
     const io = req.app.get('io');
     io.to(`chat_${chatId}`).emit('new-message', newMsg);
+    // ✅ Moved here – now `chatId` and `newMsg` are in scope
+    console.log(`📩 Emitting new-message to room chat_${chatId}:`, newMsg);
     res.json({ status: '1', payload: newMsg });
   });
 });
@@ -61,10 +62,15 @@ router.post('/message', auth, async (req, res) => {
 // Mark messages as read
 router.patch('/read/:chatId', auth, async (req, res) => {
   const messagesDB = getDB(req).messagesDB;
-  messagesDB.update({ chatId: req.params.chatId, senderId: { $ne: req.user.id }, read: false }, { $set: { read: true } }, { multi: true }, (err) => {
-    if (err) return res.json({ status: '0', message: err.message });
-    res.json({ status: '1' });
-  });
+  messagesDB.update(
+    { chatId: req.params.chatId, senderId: { $ne: req.user.id }, read: false },
+    { $set: { read: true } },
+    { multi: true },
+    (err) => {
+      if (err) return res.json({ status: '0', message: err.message });
+      res.json({ status: '1' });
+    }
+  );
 });
 
 // Get a single chat by ID

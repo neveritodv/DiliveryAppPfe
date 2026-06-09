@@ -31,14 +31,32 @@ class ChatService {
     return [];
   }
 
+  // ✅ NEW method – returns the server’s saved message
+  static Future<Map<String, dynamic>?> sendMessageAndGetMessage(
+      String chatId, String text) async {
+    try {
+      final token = ServiceCall.userPayload['auth_token'];
+      final url = Uri.parse('${SVKey.mainUrl}/api/chat/message');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'chatId': chatId, 'text': text}),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == '1') return data['payload'];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  // Old method kept for backward compatibility
   static Future<bool> sendMessage(String chatId, String text) async {
-    final token = ServiceCall.userPayload['auth_token'];
-    final url = Uri.parse('${SVKey.mainUrl}/api/chat/message');
-    final res = await http.post(url,
-        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
-        body: jsonEncode({'chatId': chatId, 'text': text}));
-    final data = jsonDecode(res.body);
-    return data['status'] == '1';
+    final msg = await sendMessageAndGetMessage(chatId, text);
+    return msg != null;
   }
 
   static Future<void> markRead(String chatId) async {

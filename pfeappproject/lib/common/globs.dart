@@ -60,9 +60,11 @@ class SVKey {
   static const baseUrl = '$mainUrl/api/';
   static const svLogin = '${baseUrl}auth/login';
   static const svSignUp = '${baseUrl}auth/sign_up';
-  static const svForgotPasswordRequest = '${baseUrl}auth/forgot_password_request';
-  static const svForgotPasswordVerify = '${baseUrl}auth/forgot_password_verify';
-  static const svForgotPasswordSetNew = '${baseUrl}auth/forgot_password_set_new';
+
+static const svForgotPasswordRequest = '${baseUrl}auth/forgot-password';
+static const svForgotPasswordVerify   = '${baseUrl}auth/verify-reset-code';
+static const svForgotPasswordSetNew   = '${baseUrl}auth/reset-password';
+
 }
 
 class KKey {
@@ -74,8 +76,8 @@ class KKey {
   static const email = "email";
   static const mobile = "mobile";
   static const address = "address";
-  static const userId = "user_id";
-  static const resetCode = "reset_code";
+  static const userId = "userId";           // ← camelCase (matches backend)
+  static const resetCode = "resetCode";     // ← camelCase (matches backend)
   static const role = "role";
   static const productType = "product_type";
   static const canPoints = "can_points";
