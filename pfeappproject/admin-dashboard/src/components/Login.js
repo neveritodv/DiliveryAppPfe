@@ -34,27 +34,123 @@ function Login() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <img src="/logo.png" alt="Logo" style={styles.logo} />
-        <h2 style={styles.title}>Admin Login</h2>
+        {/* Logo - clean, no border, no rounded corners */}
+        <img
+          src="/new.png"
+          alt="Racine Delivery Logo"
+          style={styles.logo}
+        />
+
+        {/* Brand Name */}
+        <h1 style={styles.brandName}>RACINE DELIVERY</h1>
+
+        {/* Tagline */}
+        <p style={styles.tagline}>Fast • Fresh • Reliable</p>
+
         <form onSubmit={handleLogin}>
-          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={styles.input} required />
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={styles.input} required />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            style={styles.input}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            style={styles.input}
+            required
+          />
           {error && <p style={styles.error}>{error}</p>}
-          <button type="submit" style={styles.button} disabled={loading}>{loading ? 'Loading...' : 'Login'}</button>
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
         </form>
+
+        <p style={styles.footerText}>Admin Panel</p>
       </div>
     </div>
   );
 }
 
 const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f5f5f5' },
-  card: { background: 'white', padding: '40px', borderRadius: '28px', width: '350px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
-  logo: { width: '120px', marginBottom: '20px' },
-  title: { color: '#4A4B4D', fontSize: '30px', fontWeight: '800', marginBottom: '20px' },
-  input: { width: '100%', padding: '14px', margin: '10px 0', borderRadius: '25px', border: '1px solid #ddd', fontSize: '14px' },
-  button: { width: '100%', backgroundColor: '#FC6011', color: 'white', padding: '14px', borderRadius: '28px', border: 'none', fontSize: '16px', fontWeight: '600', cursor: 'pointer', marginTop: '20px' },
-  error: { color: 'red', fontSize: '12px', marginTop: '10px' }
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+  },
+  card: {
+    background: 'white',
+    padding: '44px 40px',
+    borderRadius: '24px',
+    width: '400px',
+    textAlign: 'center',
+    boxShadow: '0 20px 60px rgba(124, 58, 237, 0.3)',
+  },
+  logo: {
+    width: '100px',
+    height: '100px',
+    objectFit: 'contain',
+    marginBottom: '16px',
+    border: 'none',
+    outline: 'none',
+    background: 'transparent',
+  },
+  brandName: {
+    color: '#7C3AED',
+    fontSize: '24px',
+    fontWeight: '900',
+    letterSpacing: '2px',
+    margin: '0 0 4px 0',
+  },
+  tagline: {
+    color: '#6B7280',
+    fontSize: '13px',
+    fontWeight: '500',
+    letterSpacing: '1px',
+    margin: '0 0 32px 0',
+  },
+  input: {
+    width: '100%',
+    padding: '14px 16px',
+    margin: '10px 0',
+    borderRadius: '12px',
+    border: '1px solid #E5E7EB',
+    fontSize: '14px',
+    color: '#1F2937',
+    backgroundColor: '#F9FAFB',
+    outline: 'none',
+    boxSizing: 'border-box',
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#7C3AED',
+    color: 'white',
+    padding: '14px',
+    borderRadius: '12px',
+    border: 'none',
+    fontSize: '16px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    marginTop: '24px',
+    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
+  },
+  error: {
+    color: '#F43F5E',
+    fontSize: '13px',
+    marginTop: '12px',
+    fontWeight: '500',
+  },
+  footerText: {
+    color: '#9CA3AF',
+    fontSize: '12px',
+    marginTop: '24px',
+  },
 };
 
 export default Login;

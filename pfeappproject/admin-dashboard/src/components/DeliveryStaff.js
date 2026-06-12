@@ -21,7 +21,9 @@ function DeliveryStaff() {
 
   const fetchStaff = async () => {
     try {
-      const res = await axios.get(`${API_URL}/admin/delivery-staff`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get(`${API_URL}/admin/delivery-staff`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setStaff(res.data.payload || []);
     } catch (err) {
       showMessage('Failed to load staff', 'error');
@@ -56,7 +58,7 @@ function DeliveryStaff() {
     formData.append('avatar', avatarFile);
     try {
       const res = await axios.post(`${API_URL}/admin/delivery-staff/${staffId}/avatar`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
+        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` },
       });
       return res.data.avatarUrl;
     } catch (err) {
@@ -68,7 +70,7 @@ function DeliveryStaff() {
   const deleteAvatar = async (staffId) => {
     try {
       await axios.delete(`${API_URL}/admin/delivery-staff/${staffId}/avatar`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       return true;
     } catch (err) {
@@ -89,7 +91,10 @@ function DeliveryStaff() {
           avatarUrl = await uploadAvatar(editingItem._id);
         }
       } else {
-        const signupRes = await axios.post(`${API_URL}/auth/sign_up`, { ...form, role: 'delivery' });
+        const signupRes = await axios.post(`${API_URL}/auth/sign_up`, {
+          ...form,
+          role: 'delivery',
+        });
         const newUserId = signupRes.data.payload.userId;
         if (avatarFile) {
           await uploadAvatar(newUserId);
@@ -105,7 +110,9 @@ function DeliveryStaff() {
       if (form.password) payload.password = form.password;
       if (avatarUrl) payload.avatar = avatarUrl;
 
-      await axios.put(`${API_URL}/admin/delivery-staff/${editingItem._id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${API_URL}/admin/delivery-staff/${editingItem._id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       showMessage('Staff updated successfully', 'success');
       fetchStaff();
       closeModal();
@@ -117,7 +124,9 @@ function DeliveryStaff() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_URL}/admin/delivery-staff/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${API_URL}/admin/delivery-staff/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       fetchStaff();
       setDeleteConfirm(null);
       showMessage('Staff deleted', 'success');
@@ -153,12 +162,18 @@ function DeliveryStaff() {
   return (
     <div style={{ padding: 20 }}>
       <div style={styles.headerBar}>
-        <h2>Delivery Staff</h2>
+        <h2 style={styles.pageTitle}>🚗 Delivery Staff</h2>
         <button onClick={() => openModal()} style={styles.addBtn}>+ Add Staff</button>
       </div>
 
       {message.text && (
-        <div style={{ ...styles.message, backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da', color: message.type === 'success' ? '#155724' : '#721c24' }}>
+        <div
+          style={{
+            ...styles.message,
+            backgroundColor: message.type === 'success' ? '#D1FAE5' : '#FEE2E2',
+            color: message.type === 'success' ? '#065F46' : '#991B1B',
+          }}
+        >
           {message.text}
         </div>
       )}
@@ -175,12 +190,17 @@ function DeliveryStaff() {
               />
             </div>
             <div style={styles.cardInfo}>
-              <div><strong>{s.name}</strong></div>
-              <div style={{ fontSize: 12, color: '#7C7D7E' }}>{s.email}</div>
-              <div style={{ fontSize: 12, color: '#7C7D7E' }}>{s.mobile || '-'}</div>
-              <div style={{ marginTop: 8 }}>
-                <span style={{ ...styles.statusBadge, backgroundColor: s.isAvailable ? '#28a745' : '#dc3545' }}>
-                  {s.isAvailable ? 'Available' : 'Offline'}
+              <div style={styles.staffName}>{s.name}</div>
+              <div style={styles.staffEmail}>{s.email}</div>
+              <div style={styles.staffMobile}>{s.mobile || '-'}</div>
+              <div style={{ marginTop: 10 }}>
+                <span
+                  style={{
+                    ...styles.statusBadge,
+                    backgroundColor: s.isAvailable ? '#10B981' : '#F43F5E',
+                  }}
+                >
+                  {s.isAvailable ? '🟢 Available' : '🔴 Offline'}
                 </span>
               </div>
             </div>
@@ -190,14 +210,18 @@ function DeliveryStaff() {
             </div>
           </div>
         ))}
-        {staff.length === 0 && <div style={{ textAlign: 'center', padding: 40, gridColumn: '1 / -1' }}>No delivery staff found</div>}
+        {staff.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, gridColumn: '1 / -1', color: '#6B7280' }}>
+            No delivery staff found
+          </div>
+        )}
       </div>
 
-      {/* Modal for Add/Edit */}
+      {/* Modal */}
       {modalOpen && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3>{editingItem ? 'Edit Staff' : 'Add Staff'}</h3>
+            <h3 style={styles.modalTitle}>{editingItem ? 'Edit Staff' : 'Add New Staff'}</h3>
             <form onSubmit={handleSubmit} style={styles.form}>
               <div style={styles.imageUploadArea}>
                 <label style={styles.label}>Profile Photo</label>
@@ -217,7 +241,9 @@ function DeliveryStaff() {
               <input placeholder="Password (leave blank to keep unchanged)" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={styles.input} />
               <input placeholder="Mobile Number" value={form.mobile} onChange={e => setForm({...form, mobile: e.target.value})} style={styles.input} />
               <div style={styles.modalButtons}>
-                <button type="submit" disabled={loading} style={styles.saveBtn}>{loading ? 'Saving...' : 'Save'}</button>
+                <button type="submit" disabled={loading} style={styles.saveBtn}>
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
                 <button type="button" onClick={closeModal} style={styles.cancelBtn}>Cancel</button>
               </div>
             </form>
@@ -243,34 +269,254 @@ function DeliveryStaff() {
 }
 
 const styles = {
-  headerBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  addBtn: { backgroundColor: '#FC6011', color: 'white', border: 'none', padding: '8px 20px', borderRadius: 24, cursor: 'pointer', fontSize: 14, fontWeight: 500 },
-  message: { padding: '10px', borderRadius: 8, marginBottom: 20, textAlign: 'center' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 },
-  card: { background: 'white', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', transition: 'transform 0.2s' },
-  avatarWrapper: { display: 'flex', justifyContent: 'center', paddingTop: 20 },
-  avatar: { width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid #FC6011' },
-  cardInfo: { padding: 16, textAlign: 'center' },
-  statusBadge: { display: 'inline-block', padding: '4px 12px', borderRadius: 20, color: 'white', fontSize: 12 },
-  cardActions: { padding: '12px 16px', display: 'flex', gap: 12, justifyContent: 'center', borderTop: '1px solid #f0f0f0' },
-  editBtn: { backgroundColor: '#4A4B4D', color: 'white', border: 'none', padding: '6px 16px', borderRadius: 20, cursor: 'pointer', fontSize: 13 },
-  deleteBtn: { backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '6px 16px', borderRadius: 20, cursor: 'pointer', fontSize: 13 },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
-  modal: { background: 'white', borderRadius: 24, padding: 28, width: 550, maxWidth: '90%', maxHeight: '90%', overflowY: 'auto', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' },
-  modalSmall: { background: 'white', borderRadius: 24, padding: 28, width: 380, textAlign: 'center' },
-  form: { display: 'flex', flexDirection: 'column', gap: 16 },
-  input: { width: '100%', padding: 12, borderRadius: 28, border: '1px solid #e0e0e0', fontSize: 14 },
-  label: { fontSize: 14, fontWeight: 500, marginBottom: 8, color: '#4A4B4D' },
-  imageUploadArea: { display: 'flex', flexDirection: 'column', gap: 8 },
-  imageInputWrapper: { display: 'flex', alignItems: 'center', gap: 12 },
-  fileInput: { display: 'none' },
-  fileLabel: { backgroundColor: '#f0f0f0', padding: '10px 16px', borderRadius: 28, cursor: 'pointer', fontSize: 14, color: '#4A4B4D' },
-  previewContainer: { position: 'relative', width: 100, marginTop: 8 },
-  previewImage: { width: 100, height: 100, objectFit: 'cover', borderRadius: 12, border: '1px solid #e0e0e0' },
-  clearBtn: { position: 'absolute', top: -8, right: -8, background: '#dc3545', color: 'white', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  modalButtons: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 },
-  saveBtn: { backgroundColor: '#FC6011', color: 'white', border: 'none', padding: '10px 20px', borderRadius: 28, cursor: 'pointer', fontSize: 14, fontWeight: 500 },
-  cancelBtn: { backgroundColor: '#f0f0f0', color: '#4A4B4D', border: 'none', padding: '10px 20px', borderRadius: 28, cursor: 'pointer', fontSize: 14 },
+  headerBar: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  pageTitle: {
+    fontSize: '24px',
+    fontWeight: '700',
+    color: '#1F2937',
+    margin: 0,
+  },
+  addBtn: {
+    backgroundColor: '#7C3AED',
+    color: 'white',
+    border: 'none',
+    padding: '10px 24px',
+    borderRadius: 12,
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
+    transition: 'all 0.2s',
+  },
+  message: {
+    padding: '12px 16px',
+    borderRadius: 12,
+    marginBottom: 20,
+    textAlign: 'center',
+    fontWeight: '500',
+    fontSize: '14px',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+    gap: 20,
+  },
+  card: {
+    background: 'white',
+    borderRadius: 20,
+    overflow: 'hidden',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+  },
+  avatarWrapper: {
+    display: 'flex',
+    justifyContent: 'center',
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '3px solid #7C3AED',
+  },
+  cardInfo: {
+    padding: '12px 20px',
+    textAlign: 'center',
+  },
+  staffName: {
+    fontWeight: '700',
+    fontSize: '16px',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  staffEmail: {
+    fontSize: '13px',
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  staffMobile: {
+    fontSize: '13px',
+    color: '#6B7280',
+  },
+  statusBadge: {
+    display: 'inline-block',
+    padding: '5px 14px',
+    borderRadius: 20,
+    color: 'white',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+  cardActions: {
+    padding: '12px 16px',
+    display: 'flex',
+    gap: 10,
+    justifyContent: 'center',
+    borderTop: '1px solid #F3F4F6',
+    background: '#FAFAFA',
+  },
+  editBtn: {
+    backgroundColor: '#7C3AED',
+    color: 'white',
+    border: 'none',
+    padding: '7px 18px',
+    borderRadius: 10,
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '500',
+  },
+  deleteBtn: {
+    backgroundColor: '#F43F5E',
+    color: 'white',
+    border: 'none',
+    padding: '7px 18px',
+    borderRadius: 10,
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(4px)',
+  },
+  modal: {
+    background: 'white',
+    borderRadius: 24,
+    padding: 28,
+    width: 520,
+    maxWidth: '90%',
+    maxHeight: '90%',
+    overflowY: 'auto',
+    boxShadow: '0 20px 60px rgba(124, 58, 237, 0.2)',
+  },
+  modalTitle: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 20,
+  },
+  modalSmall: {
+    background: 'white',
+    borderRadius: 20,
+    padding: 28,
+    width: 380,
+    textAlign: 'center',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 14,
+  },
+  input: {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: 12,
+    border: '1px solid #E5E7EB',
+    fontSize: '14px',
+    color: '#1F2937',
+    backgroundColor: '#F9FAFB',
+    outline: 'none',
+    boxSizing: 'border-box',
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: '600',
+    marginBottom: 6,
+    color: '#1F2937',
+  },
+  imageUploadArea: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  imageInputWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  fileInput: {
+    display: 'none',
+  },
+  fileLabel: {
+    backgroundColor: '#F3F4F6',
+    padding: '10px 18px',
+    borderRadius: 10,
+    cursor: 'pointer',
+    fontSize: '13px',
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  previewContainer: {
+    position: 'relative',
+    width: 90,
+    marginTop: 8,
+  },
+  previewImage: {
+    width: 90,
+    height: 90,
+    objectFit: 'cover',
+    borderRadius: 12,
+    border: '2px solid #E5E7EB',
+  },
+  clearBtn: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    background: '#F43F5E',
+    color: 'white',
+    border: 'none',
+    borderRadius: '50%',
+    width: 22,
+    height: 22,
+    cursor: 'pointer',
+    fontSize: 11,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButtons: {
+    display: 'flex',
+    gap: 12,
+    justifyContent: 'flex-end',
+    marginTop: 8,
+  },
+  saveBtn: {
+    backgroundColor: '#7C3AED',
+    color: 'white',
+    border: 'none',
+    padding: '10px 24px',
+    borderRadius: 10,
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
+  },
+  cancelBtn: {
+    backgroundColor: '#F3F4F6',
+    color: '#1F2937',
+    border: 'none',
+    padding: '10px 24px',
+    borderRadius: 10,
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+  },
 };
 
 export default DeliveryStaff;

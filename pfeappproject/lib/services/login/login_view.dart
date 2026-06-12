@@ -4,7 +4,6 @@ import 'package:food_delivery/common/color_extension.dart';
 import 'package:food_delivery/common/extension.dart';
 import 'package:food_delivery/common/globs.dart';
 import 'package:food_delivery/common_widget/round_button.dart';
-import 'package:food_delivery/common_widget/round_icon_button.dart';
 import 'package:food_delivery/common_widget/round_textfield.dart';
 import 'package:food_delivery/common/service_call.dart';
 import 'package:food_delivery/services/login/rest_password_view.dart';
@@ -26,43 +25,192 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 25),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 64),
-            Text("Login", style: TextStyle(color: TColor.primaryText, fontSize: 30, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Text("Add your details to login", style: TextStyle(color: TColor.secondaryText, fontSize: 14)),
-            const SizedBox(height: 25),
-            RoundTextfield(hintText: "Your Email", controller: txtEmail, keyboardType: TextInputType.emailAddress),
-            const SizedBox(height: 25),
-            RoundTextfield(hintText: "Password", controller: txtPassword, obscureText: true),
-            const SizedBox(height: 25),
-            RoundButton(title: "Login", onPressed: btnLogin),
-            TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ResetPasswordView())),
-              child: Text("Forgot your password?", style: TextStyle(color: TColor.secondaryText, fontSize: 14)),
-            ),
-            const SizedBox(height: 30),
-            Text("or Login With", style: TextStyle(color: TColor.secondaryText, fontSize: 14)),
-            const SizedBox(height: 30),
-            RoundIconButton(icon: "assets/img/facebook_logo.png", title: "Login with Facebook", color: const Color(0xff367FC0), onPressed: () {}),
-            const SizedBox(height: 25),
-            RoundIconButton(icon: "assets/img/google_logo.png", title: "Login with Google", color: const Color(0xffDD4B39), onPressed: () {}),
-            const SizedBox(height: 80),
-            TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpView())),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+      backgroundColor: TColor.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 40),
+
+              // Logo - clean, no rounded corners, no clipping
+              Center(
+                child: Image.asset(
+                  "assets/img/newlogo.png",
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [TColor.primary, TColor.primaryDark],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Icon(
+                        Icons.delivery_dining,
+                        color: Colors.white,
+                        size: 60,
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Brand Name
+              Text(
+                "RACINE DELIVERY",
+                style: TextStyle(
+                  color: TColor.primary,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 3,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // Tagline
+              Text(
+                "Fast • Fresh • Reliable",
+                style: TextStyle(
+                  color: TColor.secondaryText,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // Email field
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(8),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: RoundTextfield(
+                  hintText: "Email Address",
+                  controller: txtEmail,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // Password field
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(8),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: RoundTextfield(
+                  hintText: "Password",
+                  controller: txtPassword,
+                  obscureText: true,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Login button
+              RoundButton(title: "Sign In", onPressed: btnLogin),
+
+              const SizedBox(height: 18),
+
+              // Forgot password
+              TextButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ResetPasswordView()),
+                ),
+                child: Text(
+                  "Forgot your password?",
+                  style: TextStyle(
+                    color: TColor.accent,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 35),
+
+              // Divider
+              Row(
                 children: [
-                  Text("Don't have an Account? ", style: TextStyle(color: TColor.secondaryText, fontSize: 14)),
-                  Text("Sign Up", style: TextStyle(color: TColor.primary, fontSize: 14, fontWeight: FontWeight.w700)),
+                  Expanded(
+                    child: Divider(color: TColor.placeholder.withAlpha(60)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "NEW HERE?",
+                      style: TextStyle(
+                        color: TColor.placeholder,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(color: TColor.placeholder.withAlpha(60)),
+                  ),
                 ],
               ),
-            ),
-          ],
+
+              const SizedBox(height: 8),
+
+              // Sign up button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignUpView()),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: TColor.primary,
+                    side: BorderSide(color: TColor.primary, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  child: const Text(
+                    "Create Account",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -88,34 +236,37 @@ class _LoginViewState extends State<LoginView> {
       Globs.hideHUD();
       if (responseObj[KKey.status] == "1") {
         var payload = responseObj[KKey.payload] as Map? ?? {};
-        // Save to SharedPreferences
         Globs.udSet(payload, Globs.userPayload);
         Globs.udBoolSet(true, Globs.userLogin);
         String role = payload[KKey.role] ?? "client";
         Globs.udStringSet(role, Globs.userRole);
-        // Update ServiceCall static payload
         ServiceCall.userPayload = payload;
-        // Verify storage
         final prefs = await SharedPreferences.getInstance();
         final stored = prefs.getString(Globs.userPayload);
         print('📦 Stored payload: $stored');
-        // Navigate directly
         Widget nextScreen;
         if (role == 'delivery') {
           nextScreen = const DeliveryHomeView();
         } else {
           nextScreen = const MainTabView();
         }
+        if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => nextScreen),
           (route) => false,
         );
       } else {
-        mdShowAlert(Globs.appName, responseObj[KKey.message] as String? ?? MSG.fail, () {});
+        if (!mounted) return;
+        mdShowAlert(
+          Globs.appName,
+          responseObj[KKey.message] as String? ?? MSG.fail,
+          () {},
+        );
       }
     }, failure: (err) async {
       Globs.hideHUD();
+      if (!mounted) return;
       mdShowAlert(Globs.appName, err.toString(), () {});
     });
   }

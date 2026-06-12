@@ -17,8 +17,8 @@ function Reports() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/reports/admin/all`, { 
-        headers: { Authorization: `Bearer ${token}` } 
+      const res = await axios.get(`${API_URL}/reports/admin/all`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.status === '1') {
         setReports(res.data.payload || []);
@@ -36,8 +36,8 @@ function Reports() {
   const acceptReport = async (reportId) => {
     try {
       const res = await axios.patch(
-        `${API_URL}/reports/admin/${reportId}/accept`, 
-        {}, 
+        `${API_URL}/reports/admin/${reportId}/accept`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.status === '1') {
@@ -57,8 +57,8 @@ function Reports() {
   const refuseReport = async (reportId) => {
     try {
       await axios.patch(
-        `${API_URL}/reports/admin/${reportId}/refuse`, 
-        {}, 
+        `${API_URL}/reports/admin/${reportId}/refuse`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchReports();
@@ -69,17 +69,17 @@ function Reports() {
   };
 
   const getStatusBadge = (status) => {
-    const styles = {
-      pending: { bg: '#FFF3CD', color: '#856404', text: 'Pending' },
-      accepted: { bg: '#D4EDDA', color: '#155724', text: 'Accepted' },
-      refused: { bg: '#F8D7DA', color: '#721C24', text: 'Refused' },
+    const badgeStyles = {
+      pending: { bg: '#FEF3C7', color: '#92400E', text: '⏳ Pending' },
+      accepted: { bg: '#D1FAE5', color: '#065F46', text: '✅ Accepted' },
+      refused: { bg: '#FEE2E2', color: '#991B1B', text: '❌ Refused' },
     };
-    const s = styles[status] || styles.pending;
+    const s = badgeStyles[status] || badgeStyles.pending;
     return (
       <span style={{
         backgroundColor: s.bg,
         color: s.color,
-        padding: '4px 12px',
+        padding: '6px 14px',
         borderRadius: '20px',
         fontSize: '12px',
         fontWeight: '600',
@@ -89,159 +89,96 @@ function Reports() {
     );
   };
 
-  // ✅ FIXED: Always render hooks at the top level, conditional rendering below
   return (
-    <div style={{ padding: '24px', backgroundColor: '#F9FAFB', minHeight: '100vh' }}>
+    <div style={{ padding: '0px', backgroundColor: '#F9FAFB', minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '24px' 
-      }}>
+      <div style={styles.header}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '24px', color: '#1F2937' }}>Client Reports</h2>
-          <p style={{ margin: '4px 0 0', color: '#6B7280', fontSize: '14px' }}>
-            Manage and respond to client reports
-          </p>
+          <h2 style={styles.title}>📋 Client Reports</h2>
+          <p style={styles.subtitle}>Manage and respond to client reports</p>
         </div>
-        <button 
-          onClick={fetchReports}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#7C3AED',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-          }}
-        >
+        <button onClick={fetchReports} style={styles.refreshBtn}>
           🔄 Refresh
         </button>
       </div>
 
       {/* Error state */}
       {error && (
-        <div style={{
-          padding: '16px',
-          backgroundColor: '#FEE2E2',
-          borderRadius: '12px',
-          marginBottom: '16px',
-          color: '#991B1B',
-          fontSize: '14px',
-        }}>
-          {error}
+        <div style={styles.errorBanner}>
+          ⚠️ {error}
         </div>
       )}
 
       {/* Loading state */}
       {loading ? (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          padding: '60px',
-          backgroundColor: 'white',
-          borderRadius: '16px',
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid #E5E7EB',
-              borderTopColor: '#7C3AED',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 12px',
-            }} />
-            <p style={{ color: '#6B7280' }}>Loading reports...</p>
-          </div>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={{ color: '#6B7280', marginTop: 12 }}>Loading reports...</p>
         </div>
       ) : (
         /* Table */
-        <div style={{ 
-          overflowX: 'auto', 
-          background: 'white', 
-          borderRadius: '16px', 
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)' 
-        }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={styles.tableWrapper}>
+          <table style={styles.table}>
             <thead>
-              <tr style={{ 
-                backgroundColor: '#F9FAFB', 
-                borderBottom: '2px solid #E5E7EB' 
-              }}>
-                <th style={thStyle}>Client</th>
-                <th style={thStyle}>Delivery Person</th>
-                <th style={thStyle}>Order</th>
-                <th style={thStyle}>Reason</th>
-                <th style={thStyle}>Description</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Actions</th>
+              <tr style={styles.tableHeader}>
+                <th style={styles.th}>Client</th>
+                <th style={styles.th}>Delivery Person</th>
+                <th style={styles.th}>Order</th>
+                <th style={styles.th}>Reason</th>
+                <th style={styles.th}>Description</th>
+                <th style={styles.th}>Status</th>
+                <th style={styles.th}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {reports.length > 0 ? reports.map((r) => (
-                <tr key={r._id} style={{ 
-                  borderBottom: '1px solid #F3F4F6',
-                  transition: 'background 0.2s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                <tr
+                  key={r._id}
+                  style={styles.tableRow}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <td style={tdStyle}>
+                  <td style={styles.td}>
                     <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#6B7280' }}>
                       {r.clientId?.substring(0, 8)}...
                     </span>
                   </td>
-                  <td style={tdStyle}>
+                  <td style={styles.td}>
                     <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#6B7280' }}>
                       {r.deliveryPersonId?.substring(0, 8)}...
                     </span>
                   </td>
-                  <td style={tdStyle}>
-                    <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#7C3AED' }}>
+                  <td style={styles.td}>
+                    <span style={styles.orderBadge}>
                       #{r.orderId?.substring(0, 8)}
                     </span>
                   </td>
-                  <td style={{ ...tdStyle, fontWeight: '500' }}>{r.reason}</td>
-                  <td style={{ ...tdStyle, maxWidth: '200px' }}>
-                    <div style={{ 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap',
-                      maxWidth: '200px',
-                    }}>
+                  <td style={{ ...styles.td, fontWeight: '500' }}>{r.reason}</td>
+                  <td style={{ ...styles.td, maxWidth: '200px' }}>
+                    <div style={styles.truncate}>
                       {r.description || 'N/A'}
                     </div>
                   </td>
-                  <td style={tdStyle}>{getStatusBadge(r.status)}</td>
-                  <td style={tdStyle}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                  <td style={styles.td}>{getStatusBadge(r.status)}</td>
+                  <td style={styles.td}>
+                    <div style={styles.actionButtons}>
                       {r.status === 'pending' && (
                         <>
-                          <button 
-                            onClick={() => acceptReport(r._id)}
-                            style={acceptBtnStyle}
-                          >
+                          <button onClick={() => acceptReport(r._id)} style={styles.acceptBtn}>
                             ✓ Accept
                           </button>
-                          <button 
-                            onClick={() => refuseReport(r._id)}
-                            style={refuseBtnStyle}
-                          >
+                          <button onClick={() => refuseReport(r._id)} style={styles.refuseBtn}>
                             ✕ Refuse
                           </button>
                         </>
                       )}
                       {r.status === 'accepted' && (
-                        <span style={{ color: '#155724', fontSize: '13px', fontWeight: '500' }}>
+                        <span style={{ color: '#065F46', fontSize: '13px', fontWeight: '500' }}>
                           ✓ Chat opened
                         </span>
                       )}
                       {r.status === 'refused' && (
-                        <span style={{ color: '#721C24', fontSize: '13px', fontWeight: '500' }}>
+                        <span style={{ color: '#991B1B', fontSize: '13px', fontWeight: '500' }}>
                           ✕ Refused
                         </span>
                       )}
@@ -250,14 +187,10 @@ function Reports() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="7" style={{ 
-                    padding: '60px', 
-                    textAlign: 'center',
-                    color: '#9CA3AF',
-                  }}>
+                  <td colSpan="7" style={styles.emptyState}>
                     <div style={{ fontSize: '48px', marginBottom: '12px' }}>📋</div>
-                    <p style={{ fontSize: '16px', margin: 0 }}>No reports found</p>
-                    <p style={{ fontSize: '13px', margin: '4px 0 0' }}>Reports from clients will appear here</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#1F2937', fontWeight: '600' }}>No reports found</p>
+                    <p style={{ fontSize: '13px', margin: '4px 0 0', color: '#9CA3AF' }}>Reports from clients will appear here</p>
                   </td>
                 </tr>
               )}
@@ -266,7 +199,6 @@ function Reports() {
         </div>
       )}
 
-      {/* Add keyframe animation for spinner */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -277,45 +209,136 @@ function Reports() {
   );
 }
 
-// Style constants
-const thStyle = {
-  padding: '14px 16px',
-  textAlign: 'left',
-  fontWeight: '600',
-  fontSize: '12px',
-  color: '#6B7280',
-  textTransform: 'uppercase',
-  letterSpacing: '0.5px',
-};
-
-const tdStyle = {
-  padding: '14px 16px',
-  fontSize: '14px',
-  color: '#1F2937',
-};
-
-const acceptBtnStyle = {
-  background: '#10B981',
-  color: 'white',
-  border: 'none',
-  padding: '6px 14px',
-  borderRadius: '20px',
-  cursor: 'pointer',
-  fontSize: '12px',
-  fontWeight: '600',
-  transition: 'all 0.2s',
-};
-
-const refuseBtnStyle = {
-  background: '#EF4444',
-  color: 'white',
-  border: 'none',
-  padding: '6px 14px',
-  borderRadius: '20px',
-  cursor: 'pointer',
-  fontSize: '12px',
-  fontWeight: '600',
-  transition: 'all 0.2s',
+const styles = {
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  title: {
+    margin: 0,
+    fontSize: '24px',
+    color: '#1F2937',
+    fontWeight: '700',
+  },
+  subtitle: {
+    margin: '4px 0 0',
+    color: '#6B7280',
+    fontSize: '13px',
+  },
+  refreshBtn: {
+    padding: '10px 20px',
+    backgroundColor: '#7C3AED',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
+  },
+  errorBanner: {
+    padding: '14px 18px',
+    backgroundColor: '#FEE2E2',
+    borderRadius: '12px',
+    marginBottom: '16px',
+    color: '#991B1B',
+    fontSize: '14px',
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '60px',
+    backgroundColor: 'white',
+    borderRadius: '16px',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #E5E7EB',
+    borderTopColor: '#7C3AED',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  tableWrapper: {
+    overflowX: 'auto',
+    background: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+  },
+  tableHeader: {
+    backgroundColor: '#F9FAFB',
+    borderBottom: '2px solid #E5E7EB',
+  },
+  th: {
+    padding: '14px 16px',
+    textAlign: 'left',
+    fontWeight: '600',
+    fontSize: '12px',
+    color: '#6B7280',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  tableRow: {
+    borderBottom: '1px solid #F3F4F6',
+    transition: 'background 0.2s',
+  },
+  td: {
+    padding: '14px 16px',
+    fontSize: '14px',
+    color: '#1F2937',
+  },
+  orderBadge: {
+    fontFamily: 'monospace',
+    fontSize: '12px',
+    color: '#7C3AED',
+    fontWeight: '600',
+    backgroundColor: '#EDE9FE',
+    padding: '4px 10px',
+    borderRadius: '8px',
+  },
+  truncate: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '200px',
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '8px',
+  },
+  acceptBtn: {
+    background: '#10B981',
+    color: 'white',
+    border: 'none',
+    padding: '7px 16px',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+  refuseBtn: {
+    background: '#F43F5E',
+    color: 'white',
+    border: 'none',
+    padding: '7px 16px',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+  emptyState: {
+    padding: '60px',
+    textAlign: 'center',
+  },
 };
 
 export default Reports;

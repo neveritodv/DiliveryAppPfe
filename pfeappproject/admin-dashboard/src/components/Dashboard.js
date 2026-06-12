@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend
+  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
 
 const API_URL = 'http://localhost:3001/api';
@@ -37,16 +37,12 @@ function Dashboard() {
         const formattedStatus = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
         setStatusData(formattedStatus);
 
-        const usersCount = usersRes.data.payload?.length || 0;
-        const restaurantsCount = restaurantsRes.data.payload?.length || 0;
-        const productsCount = productsRes.data.payload?.length || 0;
-
         setSummary({
           orders: orders.length,
           revenue: totalRevenue,
-          users: usersCount,
-          restaurants: restaurantsCount,
-          products: productsCount,
+          users: usersRes.data.payload?.length || 0,
+          restaurants: restaurantsRes.data.payload?.length || 0,
+          products: productsRes.data.payload?.length || 0,
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -62,68 +58,71 @@ function Dashboard() {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.spinner}></div>
-        <p>Loading dashboard...</p>
+        <p style={styles.loadingText}>Loading dashboard...</p>
       </div>
     );
   }
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Dashboard Overview</h2>
-      <div style={styles.cardsGrid}>
-        <div style={styles.card}>
-          <div style={styles.cardIcon}><span>📦</span></div>
-          <div style={styles.cardContent}>
-            <h3>Total Orders</h3>
-            <p>{summary.orders}</p>
-          </div>
-        </div>
-        <div style={styles.card}>
-          <div style={styles.cardIcon}><span>💰</span></div>
-          <div style={styles.cardContent}>
-            <h3>Revenue</h3>
-            <p>${summary.revenue.toFixed(2)}</p>
-          </div>
-        </div>
-        <div style={styles.card}>
-          <div style={styles.cardIcon}><span>👥</span></div>
-          <div style={styles.cardContent}>
-            <h3>Users</h3>
-            <p>{summary.users}</p>
-          </div>
-        </div>
-        <div style={styles.card}>
-          <div style={styles.cardIcon}><span>🍽️</span></div>
-          <div style={styles.cardContent}>
-            <h3>Restaurants</h3>
-            <p>{summary.restaurants}</p>
-          </div>
-        </div>
-        <div style={styles.card}>
-          <div style={styles.cardIcon}><span>🥘</span></div>
-          <div style={styles.cardContent}>
-            <h3>Products</h3>
-            <p>{summary.products}</p>
-          </div>
-        </div>
+      <div style={styles.headerRow}>
+        <h2 style={styles.heading}>📊 Dashboard Overview</h2>
+        <button style={styles.refreshBtn} onClick={() => window.location.reload()}>
+          🔄 Refresh
+        </button>
       </div>
 
+      {/* Summary Cards */}
+      <div style={styles.cardsGrid}>
+        {[
+          { icon: '📦', label: 'Total Orders', value: summary.orders, color: '#7C3AED' },
+          { icon: '💰', label: 'Revenue', value: `$${summary.revenue.toFixed(2)}`, color: '#10B981' },
+          { icon: '👥', label: 'Users', value: summary.users, color: '#3B82F6' },
+          { icon: '🍽️', label: 'Restaurants', value: summary.restaurants, color: '#F59E0B' },
+          { icon: '🥘', label: 'Products', value: summary.products, color: '#F43F5E' },
+        ].map((item, idx) => (
+          <div key={idx} style={styles.card} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <div style={{ ...styles.cardIcon, backgroundColor: `${item.color}15` }}>
+              <span style={{ fontSize: '28px' }}>{item.icon}</span>
+            </div>
+            <div style={styles.cardContent}>
+              <h3 style={styles.cardLabel}>{item.label}</h3>
+              <p style={{ ...styles.cardValue, color: item.color }}>{item.value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts */}
       <div style={styles.chartsRow}>
         <div style={styles.chartCard}>
-          <h3 style={styles.chartTitle}>Orders – Last 7 Days</h3>
+          <h3 style={styles.chartTitle}>📈 Orders – Last 7 Days</h3>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={stats}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="date" stroke="#666" />
-              <YAxis stroke="#666" />
-              <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }} />
-              <Line type="monotone" dataKey="count" stroke="#7C3AED" strokeWidth={3} dot={{ fill: '#7C3AED', r: 4 }} activeDot={{ r: 6 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="date" stroke="#6B7280" fontSize={12} />
+              <YAxis stroke="#6B7280" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: 12,
+                  border: 'none',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#7C3AED"
+                strokeWidth={3}
+                dot={{ fill: '#7C3AED', r: 5, strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 7, fill: '#7C3AED', stroke: '#fff', strokeWidth: 3 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         <div style={styles.chartCard}>
-          <h3 style={styles.chartTitle}>Orders by Status</h3>
+          <h3 style={styles.chartTitle}>🍩 Orders by Status</h3>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
@@ -153,8 +152,31 @@ function Dashboard() {
 const styles = {
   container: {
     padding: '24px',
-    backgroundColor: '#F8F9FC',
+    backgroundColor: '#F8FAFC',
     minHeight: '100vh',
+  },
+  headerRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '24px',
+  },
+  heading: {
+    fontSize: '28px',
+    fontWeight: '700',
+    color: '#1F2937',
+    margin: 0,
+  },
+  refreshBtn: {
+    backgroundColor: '#7C3AED',
+    color: 'white',
+    border: 'none',
+    padding: '8px 20px',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    boxShadow: '0 2px 8px rgba(124, 58, 237, 0.3)',
   },
   loadingContainer: {
     display: 'flex',
@@ -166,23 +188,21 @@ const styles = {
   spinner: {
     width: '40px',
     height: '40px',
-    border: '4px solid #e0e0e0',
+    border: '4px solid #E5E7EB',
     borderTopColor: '#7C3AED',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
     marginBottom: '16px',
   },
-  heading: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: '24px',
+  loadingText: {
+    color: '#6B7280',
+    fontSize: '14px',
   },
   cardsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '20px',
-    marginBottom: '30px',
+    gap: '16px',
+    marginBottom: '28px',
   },
   card: {
     backgroundColor: '#fff',
@@ -191,16 +211,14 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-    transition: 'transform 0.2s',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+    transition: 'transform 0.2s, box-shadow 0.2s',
     cursor: 'pointer',
   },
   cardIcon: {
-    fontSize: '32px',
     width: '56px',
     height: '56px',
     borderRadius: '14px',
-    backgroundColor: '#F3F4F6',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -208,35 +226,44 @@ const styles = {
   cardContent: {
     flex: 1,
   },
-  cardContentH3: {
-    fontSize: '14px',
+  cardLabel: {
+    fontSize: '13px',
     fontWeight: '500',
     color: '#6B7280',
-    margin: '0 0 4px',
+    margin: '0 0 6px 0',
   },
-  cardContentP: {
-    fontSize: '24px',
+  cardValue: {
+    fontSize: '26px',
     fontWeight: '700',
-    color: '#1F2937',
     margin: 0,
   },
   chartsRow: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-    gap: '24px',
+    gap: '20px',
   },
   chartCard: {
     backgroundColor: '#fff',
     borderRadius: '16px',
     padding: '20px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
   },
   chartTitle: {
-    fontSize: '18px',
+    fontSize: '17px',
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: '16px',
   },
 };
+
+// Add spinner animation
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(styleSheet);
 
 export default Dashboard;

@@ -24,7 +24,6 @@ dependencies:
   image_picker: ^1.0.7
   otp_pin_field: ^1.0.1
   flutter_timezone: ^1.0.8
-  # custom_map_markers: ^1.0.0   # <-- removed
   get_it: ^7.6.7
   flutter_stripe: ^13.0.0
 
@@ -32,6 +31,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -49,3 +49,14 @@ flutter:
           weight: 700
         - asset: assets/font/Metropolis-ExtraBold.otf
           weight: 800
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/img/logo.png"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/img/logo.png"
+    background_color: "#FFFFFF"
+    theme_color: "#7C3AED"
