@@ -16,3 +16,11 @@ pids/
 *.pid
 *.seed
 *.pid.lock
+
+
+pfeappproject/backend/data/
+pfeappproject/backend/uploads/
+
+pfeappproject/backend/seed*
+pfeappproject/backend/cleanFakeData.js
+pfeappproject/backend/fix*.js
